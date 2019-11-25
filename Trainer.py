@@ -3,11 +3,15 @@ from PIL import Image
 import matplotlib.pyplot as plt
 from keras.utils import to_categorical
 from sklearn.model_selection import train_test_split
+import random
 
 class Trainer:
     
     def __init__(self):
-        
+        self.newm = 50
+        self.newn = 50
+        self.all_data = []
+        self.labels = []
         return
     
     def splitTrainVal(self, train_X, train_Y_one_hot):
@@ -25,18 +29,19 @@ class Trainer:
         return im_arr
         
     def loadData(self, ice_files, surface_files, sub_files):
-        all_data = []
-        labels = []
-        
+        random.shuffle(ice_files)
+        random.shuffle(surface_files)
+        random.shuffle(sub_files)
+        #ice
         for im in ice_files:
             image = Image.open(im)
             im_arr = self.jpegToArr(image)
-            new_im = np.zeros((50,50,3))
+            new_im = np.zeros((self.newm,self.newn,3))
             for i in range(3):
-                new_im[:,:,i] = self.rebin(im_arr[:,:,i], (50,50))
-            all_data.append(new_im)
-            labels.append(0)
-        
+                new_im[:,:,i] = self.rebin(im_arr[:,:,i], (self.newm,self.newn))
+            self.all_data.append(new_im)
+            self.labels.append(0)
+        #surface lakes
         for im in surface_files:
             image = Image.open(im)
             image_90 = image.transpose(Image.ROTATE_90)
@@ -46,21 +51,22 @@ class Trainer:
             im_arr_90 = self.jpegToArr(image_90)
             im_arr_180 = self.jpegToArr(image_180)
             im_arr_270 = self.jpegToArr(image_270)
-            new_im, new_im90, new_im180, new_im270 = np.zeros((50,50,3)), np.zeros((50,50,3)), np.zeros((50,50,3)), np.zeros((50,50,3))
+            new_im, new_im90, new_im180, new_im270 = np.zeros((self.newm,self.newn,3)), np.zeros((self.newm,self.newn,3)), np.zeros((self.newm,self.newn,3)), np.zeros((self.newm,self.newn,3))
             for i in range(3):
-                new_im[:,:,i] = self.rebin(im_arr[:,:,i], (50,50))
-                new_im90[:,:,i] = self.rebin(im_arr_90[:,:,i], (50,50))
-                new_im180[:,:,i] = self.rebin(im_arr_180[:,:,i], (50,50))
-                new_im270[:,:,i] = self.rebin(im_arr_270[:,:,i], (50,50))
-            all_data.append(new_im)
-            labels.append(1)
-            all_data.append(new_im90)
-            labels.append(1)
-            all_data.append(new_im180)
-            labels.append(1)
-            all_data.append(new_im270)
-            labels.append(1)
+                new_im[:,:,i] = self.rebin(im_arr[:,:,i], (self.newm,self.newn))
+                new_im90[:,:,i] = self.rebin(im_arr_90[:,:,i], (self.newm,self.newn))
+                new_im180[:,:,i] = self.rebin(im_arr_180[:,:,i], (self.newm,self.newn))
+                new_im270[:,:,i] = self.rebin(im_arr_270[:,:,i], (self.newm,self.newn))
+            self.all_data.append(new_im)
+            self.labels.append(1)
+            self.all_data.append(new_im90)
+            self.labels.append(1)
+            self.all_data.append(new_im180)
+            self.labels.append(1)
+            self.all_data.append(new_im270)
+            self.labels.append(1)
 
+        #subsurface lakes
         for im in sub_files:
             image = Image.open(im)
             image_90 = image.transpose(Image.ROTATE_90)
@@ -70,25 +76,25 @@ class Trainer:
             im_arr_90 = self.jpegToArr(image_90)
             im_arr_180 = self.jpegToArr(image_180)
             im_arr_270 = self.jpegToArr(image_270)
-            new_im, new_im90, new_im180, new_im270 = np.zeros((50,50,3)), np.zeros((50,50,3)), np.zeros((50,50,3)), np.zeros((50,50,3))
+            new_im, new_im90, new_im180, new_im270 = np.zeros((self.newm,self.newn,3)), np.zeros((self.newm,self.newn,3)), np.zeros((self.newm,self.newn,3)), np.zeros((self.newm,self.newn,3))
             for i in range(3):
-                new_im[:,:,i] = self.rebin(im_arr[:,:,i], (50,50))
-                new_im90[:,:,i] = self.rebin(im_arr_90[:,:,i], (50,50))
-                new_im180[:,:,i] = self.rebin(im_arr_180[:,:,i], (50,50))
-                new_im270[:,:,i] = self.rebin(im_arr_270[:,:,i], (50,50))
+                new_im[:,:,i] = self.rebin(im_arr[:,:,i], (self.newm,self.newn))
+                new_im90[:,:,i] = self.rebin(im_arr_90[:,:,i], (self.newm,self.newn))
+                new_im180[:,:,i] = self.rebin(im_arr_180[:,:,i], (self.newm,self.newn))
+                new_im270[:,:,i] = self.rebin(im_arr_270[:,:,i], (self.newm,self.newn))
             
-            all_data.append(new_im)
-            labels.append(2)
-            all_data.append(new_im90)
-            labels.append(2)
-            all_data.append(new_im180)
-            labels.append(2)
-            all_data.append(new_im270)
-            labels.append(2)
+            self.all_data.append(new_im)
+            self.labels.append(2)
+            self.all_data.append(new_im90)
+            self.labels.append(2)
+            self.all_data.append(new_im180)
+            self.labels.append(2)
+            self.all_data.append(new_im270)
+            self.labels.append(2)
     
-        all_data = np.asarray(all_data)
-        labels = np.asarray(labels)
+        self.all_data = np.asarray(self.all_data)
+        self.labels = np.asarray(self.labels)
 
-        return all_data/255, to_categorical(labels)
+        return self.all_data/255, to_categorical(self.labels)
             
         

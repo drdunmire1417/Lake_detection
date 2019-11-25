@@ -6,7 +6,7 @@ from keras.layers.normalization import BatchNormalization
 from keras.layers.advanced_activations import LeakyReLU
 
 
-class Modeler:
+class Model:
     
     def __init__(self):
         self.batch_size = 64

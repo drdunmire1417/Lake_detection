@@ -5,7 +5,7 @@ import numpy as np
 import Preprocessor
 import Labeler 
 import Trainer
-import Modeler
+import Model
 
 
 '''
@@ -40,7 +40,6 @@ TRAINING
 #surface_jpgs = glob("Data/jpegs/surface/*.jpg")
 #ice_jpgs = glob("Data/jpegs/ice/*.jpg")
 #
-#
 #train = Trainer.Trainer()
 #all_data, labels = train.loadData(ice_jpgs, surface_jpgs, sub_jpgs)
 #
@@ -49,5 +48,5 @@ TRAINING
 '''
 MODELING
 '''
-model = Modeler.Modeler()
-model.buildModel(train_X, valid_X, train_label, valid_label)
+model = Model.Model()
+model.train(train_X,train_label, valid_X, valid_label)
