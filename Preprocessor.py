@@ -174,29 +174,25 @@ class Preprocessor:
             
             data, data_norm = self.loadImages(S1file, S2file)
             
-
-            #if i== 3:
-            #data = data[2000:6000, 2000:6000, :]
-            #data_std = data_std[2000:6000, 2000:6000, :]
             print(i, ": loaded images")
             #PCAdata = self.doPCA(data_std)
             #print(i, ": PCA done")
             #labels = self.doClustering(PCAdata)
             #print(i, ": clustering done")
-            surface_mask, subsurface_mask = self.waterMasks(data, sub_geom_file, S1file)
-            print(i, ": masks done")
+  #          #surface_mask, subsurface_mask = self.waterMasks(data, sub_geom_file, S1file)
+  #         # print(i, ": masks done")
             
-            data3 = np.zeros((surface_mask.shape[0], surface_mask.shape[1], 3))
-            data3[:,:,0] = 0.2989 * data_norm[:,:,2] + 0.5870 * data_norm[:,:,1] + 0.1140 * data_norm[:,:,0]
-            data3[:,:,1] = data_norm[:,:,4]
-            data3[:,:,2] = data_norm[:,:,5]
+  #          #data3 = np.zeros((surface_mask.shape[0], surface_mask.shape[1], 3))
+  #          #data3[:,:,0] = 0.2989 * data_norm[:,:,2] + 0.5870 * data_norm[:,:,1] + 0.1140 * data_norm[:,:,0]
+  #          #data3[:,:,1] = data_norm[:,:,4]
+  #          #data3[:,:,2] = data_norm[:,:,5]
 
-            self.data_arrays.append(data3)
-            self.surface_masks.append(surface_mask)
-            self.subsurface_masks.append(subsurface_mask)
+  #         self.data_arrays.append(data3)
+  #          self.surface_masks.append(surface_mask)
+  #          self.subsurface_masks.append(subsurface_mask)
             #self.makeTif(PCAdata, labels, surface_mask, subsurface_mask, S1file)
             #print(i, ": made geotif")
                 
 
-
-        return self.data_arrays, self.surface_masks, self.subsurface_masks
+            return data
+  #      #return self.data_arrays, self.surface_masks, self.subsurface_masks

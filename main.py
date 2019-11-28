@@ -18,7 +18,14 @@ PREPROCCESSING: only need to do once
 #subsurface_geoms = sorted(glob('Data/shape_files/*_subsurface.geojson'))
 #
 #preprocess = Preprocessor.Preprocessor()
-#data, surface_masks, subsurface_masks = preprocess.preprocessData(S1_files, S2_files, subsurface_geoms)
+###data, surface_masks, subsurface_masks = preprocess.preprocessData(S1_files[2:], S2_files[2:], subsurface_geoms[2:])
+#
+#data  = preprocess.preprocessData(S1_files[2:], S2_files[2:], subsurface_geoms[2:])
+
+
+#rgb = np.dstack((data[:,:,2], data[:,:,1], data[:,:,0]))
+plt.figure(figsize = (25,25))
+plt.imshow(rgb)
 
 '''
 LABELLING:
@@ -59,11 +66,11 @@ MODELING
 PREDICTING
 '''
 
-S1_files = sorted(glob("Data/Test/*S1*.tif"))
-S2_files = sorted(glob("Data/Test/*S2*.tif"))
-
-predictor = Predictor.Predictor()
-lakes = predictor.predictLabels(S1_files, S2_files)
-
-plt.figure()
-plt.imshow(lakes[1])
+#S1_files = sorted(glob("Data/Test/*S1*.tif"))
+#S2_files = sorted(glob("Data/Test/*S2*.tif"))
+#
+#predictor = Predictor.Predictor()
+#lakes = predictor.predictLabels(S1_files, S2_files)
+#
+#plt.figure()
+#plt.imshow(lakes[1])
