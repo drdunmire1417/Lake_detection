@@ -6,6 +6,7 @@ import Preprocessor
 import Labeler 
 import Trainer
 import Model
+import Predictor
 
 
 '''
@@ -48,5 +49,21 @@ TRAINING
 '''
 MODELING
 '''
-model = Model.Model()
-model.train(train_X,train_label, valid_X, valid_label)
+#model = Model.Model()
+#model.train(train_X,train_label, valid_X, valid_label)
+
+
+
+'''
+PREDICTING
+'''
+
+S1_files = sorted(glob("Data/Test/*S1*.tif"))
+S2_files = sorted(glob("Data/Test/*S2*.tif"))
+
+predictor = Predictor.Predictor()
+data_pred = predictor.predictLabels(S1_files[0], S2_files[0])
+
+#for i in range(41):
+#    plt.figure()
+#    plt.imshow(data_pred[i])

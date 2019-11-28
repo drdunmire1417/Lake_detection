@@ -14,7 +14,7 @@ from keras import backend as K
 class Model:
     
     def __init__(self):
-        self.epochs = 50
+        self.epochs = 80
         self.init_lr = 1e-3
         self.bs = 32
         return
@@ -78,4 +78,5 @@ class Model:
         
         model_train = model.fit(train_X, train_labels,batch_size=self.bs,epochs=self.epochs,verbose=1,validation_data=(valid_X, valid_labels))
 
+        model.save("lake_model.h5py")
         return
