@@ -14,9 +14,9 @@ from keras import backend as K
 class Model:
     
     def __init__(self):
-        self.epochs = 80
+        self.epochs = 100
         self.init_lr = 1e-3
-        self.bs = 32
+        self.bs = 64
         return
     
     def build(self, width, height, depth, classes):
@@ -76,7 +76,14 @@ class Model:
         opt = Adam(lr = self.init_lr, decay = self.init_lr/self.epochs)
         model.compile(loss = "categorical_crossentropy", optimizer = opt, metrics = ["accuracy"])
         
-        model_train = model.fit(train_X, train_labels,batch_size=self.bs,epochs=self.epochs,verbose=1,validation_data=(valid_X, valid_labels))
+        model.fit(train_X, train_labels,batch_size=self.bs,epochs=self.epochs,verbose=1,validation_data=(valid_X, valid_labels))
 
-        model.save("lake_model.h5py")
+        # serialize model to JSON
+        model_json = model.to_json()
+        with open("lake_model.json", "w") as json_file:
+            json_file.write(model_json)
+        # serialize weights to HDF5
+        model.save_weights("lake_model.h5")
+        print("[INFO] Saved model to disk")
+        
         return

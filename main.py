@@ -2,6 +2,7 @@ from glob import glob
 import matplotlib.pyplot as plt
 import numpy as np
 
+
 import Preprocessor
 import Labeler 
 import Trainer
@@ -62,8 +63,7 @@ S1_files = sorted(glob("Data/Test/*S1*.tif"))
 S2_files = sorted(glob("Data/Test/*S2*.tif"))
 
 predictor = Predictor.Predictor()
-data_pred = predictor.predictLabels(S1_files[0], S2_files[0])
+lakes = predictor.predictLabels(S1_files, S2_files)
 
-#for i in range(41):
-#    plt.figure()
-#    plt.imshow(data_pred[i])
+plt.figure()
+plt.imshow(lakes[1])
