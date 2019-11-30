@@ -26,7 +26,8 @@ class Predictor:
         self.lakes = []
 
         return
-    
+        
+        
     def splitData(self, data):
         data_arrays = []
         
@@ -49,7 +50,9 @@ class Predictor:
                     data_arrays.append(new_d)
          
         data_arrays = np.asarray(data_arrays)
-        return data_arrays    
+        return data_arrays
+
+
     
     
     def predictLabels(self, S1files, S2files):

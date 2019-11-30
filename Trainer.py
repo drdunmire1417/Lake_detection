@@ -14,9 +14,11 @@ class Trainer:
         self.labels = []
         return
     
-    def splitTrainVal(self, train_X, train_Y_one_hot):
-        train_X,valid_X,train_label,valid_label = train_test_split(train_X, train_Y_one_hot, test_size=0.2, random_state=13)
-        return train_X, valid_X, train_label, valid_label
+    def splitTrainVal(self, X, y):
+        train_X, test_X, train_labels, test_labels = train_test_split(X, y, test_size=0.15, random_state=1)
+        train_X, val_X, train_labels, val_labels = train_test_split(train_X, train_labels, test_size=0.2, random_state=1)        
+        
+        return train_X, val_X, test_X, train_labels, val_labels, test_labels
     
     def rebin(self, arr, new_shape):
         """Rebin 2D array arr to shape new_shape by averaging."""

@@ -92,19 +92,30 @@ class Preprocessor:
         
         return labels
     
-    def waterMasks(self, data, geom_file, S1file):
+    def surfaceMask(self, data):
+        
+        '''
+        creates masks for surface and subsurface water areas
+        :param data: all 6 bands of data - to mask surface water
+        :return: masks for surface
+        '''
+        #make surface water mask
+        NDWI = (data[:,:,0] - data[:,:,2])/(data[:,:,0] + data[:,:,2])
+        surface_water = np.zeros((NDWI.shape))
+        surface_water[NDWI > 0.15] = 1
+        
+        return surface_water
+
+    
+    def subsurfaceMask(self, data, geom_file, S1file):
         
         '''
         creates masks for surface and subsurface water areas
         :param data: all 6 bands of data - to mask surface water
         :param geom_file: file path of shapes for subsurface lakes
         :param S1 file: file path for Sentinel 1 data
-        :return: masks for surface and subsurface water
+        :return: masks for subsurface water
         '''
-        #make surface water mask
-        NDWI = (data[:,:,0] - data[:,:,2])/(data[:,:,0] + data[:,:,2])
-        surface_water = np.zeros((NDWI.shape))
-        surface_water[NDWI > 0.15] = 1
         
         #make subsurface mask
         shapefile_sub = geopandas.read_file(geom_file)
@@ -113,14 +124,14 @@ class Preprocessor:
             subsurface_out, out_transform = mask(src, subsurface_geom, crop=False)
 
         
-        subsurface = np.zeros(NDWI.shape)
+        subsurface = np.zeros((data.shape[0], data.shape[1]))
         if data.shape[0]==4000:
             subsurface[subsurface_out[0,2000:6000,2000:6000] != 0] = 1
         else:
             subsurface[subsurface_out[0,:,:] != 0] = 1
 
 
-        return surface_water, subsurface
+        return subsurface
     
     def makeTif(self, PCAdata, labels, surface, subsurface, fileS1):        
         
@@ -170,7 +181,7 @@ class Preprocessor:
         for i in range(len(S1Paths)):
             S1file = S1Paths[i]
             S2file = S2Paths[i]
-            sub_geom_file = geoms[i]
+            #sub_geom_file = geoms[i]
             
             data, data_norm = self.loadImages(S1file, S2file)
             
@@ -179,20 +190,21 @@ class Preprocessor:
             #print(i, ": PCA done")
             #labels = self.doClustering(PCAdata)
             #print(i, ": clustering done")
-  #          #surface_mask, subsurface_mask = self.waterMasks(data, sub_geom_file, S1file)
-  #         # print(i, ": masks done")
+            surface_mask = self.surfaceMask(data)
+            print(i, ": surface mask done")
+            #subsurface_mask = self.subsurfaceMask(data, sub_geom_file, S1file)
+            #print(i, ": subsurface mask done")
             
-  #          #data3 = np.zeros((surface_mask.shape[0], surface_mask.shape[1], 3))
-  #          #data3[:,:,0] = 0.2989 * data_norm[:,:,2] + 0.5870 * data_norm[:,:,1] + 0.1140 * data_norm[:,:,0]
-  #          #data3[:,:,1] = data_norm[:,:,4]
-  #          #data3[:,:,2] = data_norm[:,:,5]
+            data3 = np.zeros((data.shape[0], data.shape[1], 3))
+            data3[:,:,0] = 0.2989 * data_norm[:,:,2] + 0.5870 * data_norm[:,:,1] + 0.1140 * data_norm[:,:,0]
+            data3[:,:,1] = data_norm[:,:,4]
+            data3[:,:,2] = data_norm[:,:,5]
 
-  #         self.data_arrays.append(data3)
-  #          self.surface_masks.append(surface_mask)
-  #          self.subsurface_masks.append(subsurface_mask)
+            self.data_arrays.append(data3)
+            self.surface_masks.append(surface_mask)
+            self.subsurface_masks.append(np.zeros((data.shape[0], data.shape[1])))
             #self.makeTif(PCAdata, labels, surface_mask, subsurface_mask, S1file)
             #print(i, ": made geotif")
                 
 
-            return data
-  #      #return self.data_arrays, self.surface_masks, self.subsurface_masks
+        return self.data_arrays, self.surface_masks, self.subsurface_masks
