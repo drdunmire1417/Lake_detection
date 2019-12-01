@@ -53,9 +53,9 @@ TRAINING
 '''
 MODELING
 '''
-#model = Model.Model()
+model = Model.Model()
 #lake_model, lake_model_train = model.train(train_X,train_label, valid_X, valid_label)
-#
+
 #model.plotModelStats(lake_model_train)
 #model.analyzeAccuracy(lake_model, test_X, test_label)
 
@@ -66,9 +66,9 @@ PREDICTING
 #S1_files = sorted(glob("Data/Test/*S1*.tif"))
 #S2_files = sorted(glob("Data/Test/*S2*.tif"))
 #
-#predictor = Predictor.Predictor()
+predictor = Predictor.Predictor()
+lake_model = predictor.getModel()
+model.analyzeAccuracy(lake_model, test_X, test_label)
+
 #
 #lakes = predictor.predictLabels(S1_files, S2_files)
-
-plt.figure()
-plt.imshow(lakes[47])

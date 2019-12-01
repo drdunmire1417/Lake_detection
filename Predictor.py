@@ -26,6 +26,9 @@ class Predictor:
         self.lakes = []
 
         return
+    
+    def getModel(self):
+        return self.loaded_model
         
         
     def splitData(self, data):
