@@ -29,6 +29,7 @@ class Preprocessor:
         return data_std
     
     def normalize(self, data):
+        print("normalizing data")
         data_norm = np.zeros(data.shape)
         for i in range(data.shape[2]):
             data_norm[:,:,i] = (data[:,:,i] - np.nanmin(data[:,:,i]))/(np.nanmax(data[:,:,i] - np.nanmin(data[:,:,i])))
@@ -50,50 +51,15 @@ class Preprocessor:
         data[:,:,5] = dataS1[1,:,:] #HV
         
         data_norm = self.normalize(data)
-        print("normalized data")
+
         
         #data[np.isnan(data)] = 0
         #data_norm[np.isnan(data_norm)] = 0
         
         return data, data_norm
     
-    def doPCA(self, data):
-        
-        m = data.shape[0]
-        n = data.shape[1]
-        d = data.shape[2]
-        
-        #reshape data
-        data2 = data.reshape(m*n,d)
-        
-        #compute covariance matrix
-        C = np.cov(np.transpose(data2))
-        
-        #eigenvalue decomposition
-        evals, evecs = np.linalg.eig(C)
-        idx = evals.argsort()[::-1]   
-        evals = evals[idx]
-        evecs = evecs[:,idx]
-
-        #take top eigenvectors that explain 99% of data
-        projected_data = np.dot(data2,evecs[:,0:3]);
-        projected_data = projected_data.reshape(m,n,3);
-        
-        return projected_data
     
-    def doClustering(self, data):
-        data_flat = data.reshape((data.shape[0]*data.shape[1], data.shape[2]))
-        gmm = GaussianMixture(n_components=3, covariance_type='full')
-        
-        gmm.fit(data_flat)
-        
-        labels = gmm.predict(data_flat)
-        labels = labels.reshape(data.shape[0],data.shape[1])
-        
-        return labels
-    
-    def surfaceMask(self, data):
-        
+    def surfaceMask(self, data):        
         '''
         creates masks for surface and subsurface water areas
         :param data: all 6 bands of data - to mask surface water
@@ -107,8 +73,7 @@ class Preprocessor:
         return surface_water
 
     
-    def subsurfaceMask(self, data, geom_file, S1file):
-        
+    def subsurfaceMask(self, data, geom_file, S1file):        
         '''
         creates masks for surface and subsurface water areas
         :param data: all 6 bands of data - to mask surface water
@@ -125,51 +90,9 @@ class Preprocessor:
 
         
         subsurface = np.zeros((data.shape[0], data.shape[1]))
-        if data.shape[0]==4000:
-            subsurface[subsurface_out[0,2000:6000,2000:6000] != 0] = 1
-        else:
-            subsurface[subsurface_out[0,:,:] != 0] = 1
-
+        subsurface[subsurface_out[0,:,:] != 0] = 1
 
         return subsurface
-    
-    def makeTif(self, PCAdata, labels, surface, subsurface, fileS1):        
-        
-        '''
-        exports PCA data and masks to tif file so I don't need to do this everytime
-        :param PCAdata: 3 bands of PCA data
-        :param labels: labels mask
-        :param surface: surface water mask
-        :param subsurface: subsurface water mask
-        :param fileS1: sentinel 1 file to get meta data
-        :return:
-        '''
-        
-        outfile = 'Data/masks/mask_' + fileS1.split('_')[-2] + '.tif'
-        
-        
-        with rasterio.open(fileS1) as src:
-            meta = src.meta
-            
-        print(PCAdata.shape)
-            
-        meta.update(count = 6)
-        
-        
-        if PCAdata.shape[0]==4000:
-            meta.update(width = 4000)
-            meta.update(height = 4000)
-            print(meta)
-               
-        with rasterio.open(outfile, 'w', **meta) as dst:
-             dst.write_band(1, PCAdata[:,:,0])
-             dst.write_band(2, PCAdata[:,:,1])
-             dst.write_band(3, PCAdata[:,:,2])
-             dst.write_band(4, labels.astype(float))
-             dst.write_band(5, surface)
-             dst.write_band(6, subsurface)
-             
-        return
         
     def preprocessData(self, S1Paths, S2Paths, geoms):
         '''
@@ -181,30 +104,28 @@ class Preprocessor:
         for i in range(len(S1Paths)):
             S1file = S1Paths[i]
             S2file = S2Paths[i]
-            #sub_geom_file = geoms[i]
+            sub_geom_file = geoms[i]
             
             data, data_norm = self.loadImages(S1file, S2file)
             
             print(i, ": loaded images")
-            #PCAdata = self.doPCA(data_std)
-            #print(i, ": PCA done")
-            #labels = self.doClustering(PCAdata)
-            #print(i, ": clustering done")
             surface_mask = self.surfaceMask(data)
+            self.surface_masks.append(surface_mask)
             print(i, ": surface mask done")
-            #subsurface_mask = self.subsurfaceMask(data, sub_geom_file, S1file)
-            #print(i, ": subsurface mask done")
             
+            if sub_geom_file is not None:
+                subsurface_mask = self.subsurfaceMask(data, sub_geom_file, S1file)
+                self.subsurface_masks.append(subsurface_mask)
+                print(i, ": subsurface mask done")
+            else:
+                self.subsurface_masks.append(np.zeros((data.shape[0], data.shape[1])))
+
             data3 = np.zeros((data.shape[0], data.shape[1], 3))
             data3[:,:,0] = 0.2989 * data_norm[:,:,2] + 0.5870 * data_norm[:,:,1] + 0.1140 * data_norm[:,:,0]
             data3[:,:,1] = data_norm[:,:,4]
             data3[:,:,2] = data_norm[:,:,5]
 
             self.data_arrays.append(data3)
-            self.surface_masks.append(surface_mask)
-            self.subsurface_masks.append(np.zeros((data.shape[0], data.shape[1])))
-            #self.makeTif(PCAdata, labels, surface_mask, subsurface_mask, S1file)
-            #print(i, ": made geotif")
                 
 
         return self.data_arrays, self.surface_masks, self.subsurface_masks

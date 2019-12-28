@@ -24,6 +24,8 @@ class Predictor:
         self.loaded_model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
         
         self.lakes = []
+        self.Xlake = []
+        self.Ylake = []
 
         return
     
@@ -40,8 +42,8 @@ class Predictor:
         n = data.shape[1]
             
         for i in range(0, m, 100):
+
             for j in range(0,n, 100):
-                
                 temp_data = data[i:i+dx, j:j+dx,:]
                 
                 if temp_data[:,:,0].all()==0 or temp_data.shape[0] != 300 or temp_data.shape[1] != 300:
@@ -65,7 +67,7 @@ class Predictor:
             S2file = S2files[i]
                        
             data, data_norm = self.preprocess.loadImages(S1file, S2file)
-            
+                        
             data3 = np.zeros((data.shape[0], data.shape[1], 3))
             data3[:,:,0] = 0.2989 * data_norm[:,:,2] + 0.5870 * data_norm[:,:,1] + 0.1140 * data_norm[:,:,0]
             data3[:,:,1] = data_norm[:,:,4]
@@ -77,10 +79,15 @@ class Predictor:
             predicted_classes = self.loaded_model.predict(data_arrays)
             predicted_classes = np.argmax(np.round(predicted_classes),axis=1)
             
+            plt.figure(figsize = (10,10))
+            plt.imshow(data3[:,:,1], cmap = 'gray')
+            plt.show()
             for i in range(len(predicted_classes)):
                 if predicted_classes[i] == 2:
                     self.lakes.append(data_arrays[i,:,:,:])
-            
+                    plt.figure()
+                    plt.imshow(data_arrays[i,:,:,:])
+                    plt.show()
             
         #score = loaded_model.evaluate(train_X, train_label, verbose=0)
 
